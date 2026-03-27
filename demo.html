@@ -1,0 +1,1089 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>StudySpace</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg-base: #0e0f13;
+    --bg-sidebar: #13141a;
+    --bg-panel: #16181f;
+    --bg-main: #1a1c25;
+    --bg-card: #1f2130;
+    --bg-input: #252837;
+    --accent: #7c6aff;
+    --accent-soft: rgba(124, 106, 255, 0.12);
+    --accent-mid: rgba(124, 106, 255, 0.25);
+    --green: #4ade80;
+    --green-soft: rgba(74, 222, 128, 0.12);
+    --amber: #fbbf24;
+    --amber-soft: rgba(251, 191, 36, 0.12);
+    --red: #f87171;
+    --red-soft: rgba(248, 113, 113, 0.12);
+    --blue: #60a5fa;
+    --blue-soft: rgba(96, 165, 250, 0.12);
+    --text-primary: #e8e9f0;
+    --text-secondary: #8b8fa8;
+    --text-muted: #555870;
+    --border: rgba(255,255,255,0.06);
+    --border-accent: rgba(124, 106, 255, 0.3);
+    --radius: 10px;
+    --radius-sm: 6px;
+  }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg-base);
+    color: var(--text-primary);
+    height: 100vh;
+    display: flex;
+    overflow: hidden;
+    font-size: 14px;
+  }
+
+  /* ── SERVER/ROOM RAIL (far left, like Discord's server icons) ── */
+  .rail {
+    width: 64px;
+    background: var(--bg-base);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 12px 0;
+    gap: 6px;
+    border-right: 1px solid var(--border);
+    flex-shrink: 0;
+  }
+
+  .rail-icon {
+    width: 44px; height: 44px;
+    border-radius: 14px;
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Syne', sans-serif;
+    font-weight: 700; font-size: 15px;
+    cursor: pointer;
+    transition: border-radius 0.2s, background 0.2s;
+    position: relative;
+    flex-shrink: 0;
+  }
+
+  .rail-icon:hover { border-radius: 10px; }
+
+  .rail-icon.active {
+    border-radius: 10px;
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
+
+  .rail-icon.g1 { background: linear-gradient(135deg, #7c6aff, #a855f7); color: #fff; }
+  .rail-icon.g2 { background: linear-gradient(135deg, #06b6d4, #3b82f6); color: #fff; }
+  .rail-icon.g3 { background: linear-gradient(135deg, #f59e0b, #ef4444); color: #fff; }
+  .rail-icon.add-btn { background: var(--bg-card); color: var(--accent); font-size: 22px; font-weight: 300; border: 1px dashed var(--border-accent); }
+  .rail-icon.add-btn:hover { background: var(--accent-soft); }
+
+  .rail-divider { width: 28px; height: 1px; background: var(--border); margin: 4px 0; }
+
+  /* Notification dot */
+  .rail-icon .dot {
+    position: absolute; bottom: 2px; right: 2px;
+    width: 10px; height: 10px; border-radius: 50%;
+    background: var(--green); border: 2px solid var(--bg-base);
+  }
+
+  /* ── CHANNEL SIDEBAR ── */
+  .sidebar {
+    width: 220px;
+    background: var(--bg-sidebar);
+    display: flex;
+    flex-direction: column;
+    border-right: 1px solid var(--border);
+    flex-shrink: 0;
+  }
+
+  .sidebar-header {
+    padding: 16px 14px 12px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .group-name {
+    font-family: 'Syne', sans-serif;
+    font-weight: 700; font-size: 15px;
+    color: var(--text-primary);
+    display: flex; align-items: center; gap: 6px;
+  }
+
+  .group-name .crown { font-size: 12px; }
+
+  .group-meta {
+    font-size: 11px; color: var(--text-muted);
+    margin-top: 3px;
+  }
+
+  .sidebar-section {
+    padding: 14px 10px 4px;
+  }
+
+  .section-label {
+    font-size: 10px; font-weight: 600;
+    color: var(--text-muted);
+    text-transform: uppercase; letter-spacing: 0.08em;
+    padding: 0 4px; margin-bottom: 4px;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+
+  .section-label span.add { cursor: pointer; font-size: 16px; font-weight: 400; line-height: 1; color: var(--text-muted); transition: color 0.15s; }
+  .section-label span.add:hover { color: var(--text-primary); }
+
+  .channel-item {
+    display: flex; align-items: center; gap: 8px;
+    padding: 6px 8px; border-radius: var(--radius-sm);
+    cursor: pointer; color: var(--text-secondary);
+    transition: background 0.15s, color 0.15s;
+    font-size: 13.5px;
+    position: relative;
+  }
+
+  .channel-item:hover { background: rgba(255,255,255,0.04); color: var(--text-primary); }
+
+  .channel-item.active {
+    background: var(--accent-soft);
+    color: var(--text-primary);
+  }
+
+  .channel-item.active::before {
+    content: '';
+    position: absolute; left: 0; top: 20%; bottom: 20%;
+    width: 2px; border-radius: 2px;
+    background: var(--accent);
+  }
+
+  .channel-icon { font-size: 13px; opacity: 0.7; width: 16px; text-align: center; }
+
+  .channel-badge {
+    margin-left: auto;
+    background: var(--red);
+    color: #fff; font-size: 10px; font-weight: 600;
+    padding: 1px 5px; border-radius: 8px;
+    min-width: 16px; text-align: center;
+  }
+
+  /* User card at bottom of sidebar */
+  .user-card {
+    margin-top: auto;
+    padding: 10px 12px;
+    border-top: 1px solid var(--border);
+    display: flex; align-items: center; gap: 8px;
+    background: var(--bg-base);
+  }
+
+  .avatar {
+    width: 32px; height: 32px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Syne', sans-serif; font-weight: 700; font-size: 12px;
+    flex-shrink: 0;
+  }
+
+  .avatar.av1 { background: linear-gradient(135deg, #7c6aff, #a855f7); color: #fff; }
+  .avatar.av2 { background: linear-gradient(135deg, #06b6d4, #3b82f6); color: #fff; }
+  .avatar.av3 { background: linear-gradient(135deg, #f59e0b, #ef4444); color: #fff; }
+  .avatar.av4 { background: linear-gradient(135deg, #4ade80, #06b6d4); color: #fff; }
+
+  .user-info { flex: 1; min-width: 0; }
+  .user-name { font-size: 13px; font-weight: 500; color: var(--text-primary); }
+  .user-status { font-size: 11px; color: var(--green); }
+
+  .user-actions { display: flex; gap: 4px; }
+  .icon-btn {
+    width: 26px; height: 26px; border-radius: 6px;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; color: var(--text-muted); font-size: 13px;
+    transition: background 0.15s, color 0.15s;
+    border: none; background: transparent;
+  }
+  .icon-btn:hover { background: rgba(255,255,255,0.06); color: var(--text-primary); }
+
+  /* ── FEATURE PANEL (the key middle column) ── */
+  .feature-panel {
+    width: 56px;
+    background: var(--bg-panel);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 12px 0;
+    gap: 2px;
+    border-right: 1px solid var(--border);
+    flex-shrink: 0;
+    overflow: hidden;
+    transition: width 0.25s cubic-bezier(0.4,0,0.2,1);
+    position: relative;
+  }
+
+  .feature-panel.expanded { width: 200px; align-items: stretch; padding: 12px 8px; }
+
+  .panel-toggle {
+    position: absolute; top: 14px; right: -10px;
+    width: 20px; height: 20px; border-radius: 50%;
+    background: var(--bg-card); border: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; font-size: 9px; color: var(--text-muted);
+    z-index: 10; transition: color 0.15s, border-color 0.15s;
+  }
+  .panel-toggle:hover { color: var(--text-primary); border-color: var(--accent); }
+
+  .panel-section-label {
+    font-size: 9px; font-weight: 600; color: var(--text-muted);
+    text-transform: uppercase; letter-spacing: 0.1em;
+    padding: 8px 6px 4px; display: none;
+  }
+
+  .feature-panel.expanded .panel-section-label { display: block; }
+
+  .feature-btn {
+    display: flex; align-items: center; gap: 10px;
+    width: 40px; height: 40px;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    color: var(--text-muted);
+    transition: background 0.15s, color 0.15s, width 0.25s;
+    font-size: 17px;
+    justify-content: center;
+    position: relative;
+    flex-shrink: 0;
+    border: none; background: transparent;
+  }
+
+  .feature-panel.expanded .feature-btn {
+    width: 100%; height: 36px;
+    justify-content: flex-start;
+    padding: 0 8px;
+    border-radius: var(--radius-sm);
+  }
+
+  .feature-btn:hover { background: rgba(255,255,255,0.05); color: var(--text-primary); }
+
+  .feature-btn.active { background: var(--accent-soft); color: var(--accent); }
+
+  .feature-btn .label {
+    font-size: 12.5px; font-weight: 500;
+    display: none; white-space: nowrap;
+  }
+
+  .feature-panel.expanded .feature-btn .label { display: block; }
+
+  .feature-btn .notif {
+    position: absolute; top: 6px; right: 6px;
+    width: 7px; height: 7px; border-radius: 50%;
+    background: var(--red); border: 1.5px solid var(--bg-panel);
+    display: none;
+  }
+
+  .feature-btn.has-notif .notif { display: block; }
+  .feature-panel.expanded .feature-btn .notif {
+    position: static; width: auto; height: auto;
+    border-radius: 8px; padding: 1px 5px; font-size: 10px;
+    border: none; color: #fff; font-weight: 600;
+    margin-left: auto; display: block;
+  }
+
+  .feature-btn.has-notif.active .notif { background: var(--accent); }
+
+  /* Tooltip for collapsed panel */
+  .feature-btn[data-tip]:hover::after {
+    content: attr(data-tip);
+    position: absolute; left: calc(100% + 10px); top: 50%;
+    transform: translateY(-50%);
+    background: var(--bg-card); color: var(--text-primary);
+    font-size: 12px; padding: 4px 10px; border-radius: 6px;
+    white-space: nowrap; pointer-events: none;
+    border: 1px solid var(--border);
+    z-index: 100;
+  }
+
+  .feature-panel.expanded .feature-btn[data-tip]:hover::after { display: none; }
+
+  .panel-divider { width: 28px; height: 1px; background: var(--border); margin: 6px auto; flex-shrink: 0; }
+  .feature-panel.expanded .panel-divider { width: 100%; }
+
+  /* ── MAIN CONTENT AREA ── */
+  .main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    background: var(--bg-main);
+    min-width: 0;
+  }
+
+  /* Top bar */
+  .topbar {
+    height: 48px;
+    border-bottom: 1px solid var(--border);
+    display: flex; align-items: center;
+    padding: 0 16px; gap: 12px;
+    flex-shrink: 0;
+    background: var(--bg-main);
+  }
+
+  .topbar-icon { font-size: 15px; color: var(--text-muted); }
+  .topbar-name { font-family: 'Syne', sans-serif; font-weight: 600; font-size: 14px; }
+  .topbar-desc { font-size: 12px; color: var(--text-muted); padding-left: 10px; border-left: 1px solid var(--border); margin-left: 2px; }
+
+  .topbar-actions { margin-left: auto; display: flex; gap: 4px; }
+
+  .pill-btn {
+    display: flex; align-items: center; gap: 5px;
+    padding: 5px 12px; border-radius: 20px;
+    font-size: 12px; font-weight: 500; cursor: pointer;
+    border: 1px solid var(--border); background: transparent;
+    color: var(--text-secondary); transition: all 0.15s;
+  }
+  .pill-btn:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-soft); }
+
+  /* ── CHAT VIEW ── */
+  .chat-view { display: flex; flex-direction: column; flex: 1; min-height: 0; }
+
+  .messages {
+    flex: 1; overflow-y: auto; padding: 16px;
+    display: flex; flex-direction: column; gap: 2px;
+  }
+
+  .messages::-webkit-scrollbar { width: 4px; }
+  .messages::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+
+  .msg-group { display: flex; gap: 10px; padding: 4px 0; }
+  .msg-group:hover .msg-content { background: rgba(255,255,255,0.015); border-radius: var(--radius-sm); }
+
+  .msg-avatar { width: 36px; height: 36px; flex-shrink: 0; margin-top: 2px; }
+
+  .msg-body { flex: 1; min-width: 0; }
+
+  .msg-meta { display: flex; align-items: baseline; gap: 8px; margin-bottom: 2px; }
+  .msg-author { font-size: 13.5px; font-weight: 500; color: var(--text-primary); }
+  .msg-author.you { color: var(--accent); }
+  .msg-time { font-size: 11px; color: var(--text-muted); }
+
+  .msg-text { font-size: 13.5px; color: var(--text-secondary); line-height: 1.55; }
+
+  .msg-text .mention {
+    color: var(--accent); background: var(--accent-soft);
+    padding: 0 3px; border-radius: 3px; cursor: pointer;
+  }
+
+  .msg-text .task-ref {
+    display: inline-flex; align-items: center; gap: 4px;
+    color: var(--green); background: var(--green-soft);
+    padding: 1px 6px; border-radius: 4px; font-size: 12px;
+  }
+
+  .file-chip {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: var(--bg-card); border: 1px solid var(--border);
+    border-radius: var(--radius-sm); padding: 6px 10px;
+    margin-top: 6px; font-size: 12px; color: var(--text-secondary);
+    cursor: pointer; transition: border-color 0.15s;
+  }
+  .file-chip:hover { border-color: var(--accent); color: var(--text-primary); }
+  .file-chip .file-icon { font-size: 16px; }
+
+  .ai-banner {
+    background: var(--accent-soft); border: 1px solid var(--border-accent);
+    border-radius: var(--radius); padding: 10px 14px; margin: 8px 0;
+    display: flex; align-items: flex-start; gap: 10px;
+  }
+  .ai-banner .ai-icon { font-size: 16px; flex-shrink: 0; margin-top: 1px; }
+  .ai-banner .ai-text { font-size: 12.5px; color: var(--text-secondary); line-height: 1.5; }
+  .ai-banner .ai-text strong { color: var(--accent); font-weight: 500; }
+  .ai-banner .ai-actions { display: flex; gap: 6px; margin-top: 6px; }
+  .ai-action-btn {
+    font-size: 11px; padding: 3px 10px; border-radius: 20px;
+    border: 1px solid var(--border-accent); color: var(--accent);
+    background: transparent; cursor: pointer; transition: background 0.15s;
+  }
+  .ai-action-btn:hover { background: var(--accent-mid); }
+
+  /* Date divider */
+  .date-divider {
+    display: flex; align-items: center; gap: 10px;
+    color: var(--text-muted); font-size: 11px; margin: 8px 0;
+  }
+  .date-divider::before, .date-divider::after {
+    content: ''; flex: 1; height: 1px; background: var(--border);
+  }
+
+  /* Chat input */
+  .chat-input-area {
+    padding: 12px 16px;
+    flex-shrink: 0;
+  }
+
+  .chat-input-box {
+    background: var(--bg-input); border: 1px solid var(--border);
+    border-radius: var(--radius); display: flex; align-items: center;
+    gap: 8px; padding: 0 12px;
+    transition: border-color 0.15s;
+  }
+  .chat-input-box:focus-within { border-color: var(--border-accent); }
+
+  .chat-input {
+    flex: 1; background: transparent; border: none; outline: none;
+    color: var(--text-primary); font-family: 'DM Sans', sans-serif;
+    font-size: 13.5px; padding: 11px 0;
+  }
+  .chat-input::placeholder { color: var(--text-muted); }
+
+  .input-actions { display: flex; gap: 2px; }
+
+  /* ── DASHBOARD VIEW ── */
+  .dashboard-view {
+    flex: 1; overflow-y: auto; padding: 20px;
+    display: none; flex-direction: column; gap: 16px;
+  }
+
+  .dashboard-view.active { display: flex; }
+
+  .dash-greeting {
+    font-family: 'Syne', sans-serif;
+    font-weight: 700; font-size: 22px;
+    color: var(--text-primary);
+    margin-bottom: 4px;
+  }
+
+  .dash-sub { font-size: 13px; color: var(--text-muted); }
+
+  .stat-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+
+  .stat-card {
+    background: var(--bg-card); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 14px;
+    cursor: pointer; transition: border-color 0.2s;
+  }
+  .stat-card:hover { border-color: var(--border-accent); }
+
+  .stat-icon { font-size: 18px; margin-bottom: 8px; }
+  .stat-value { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 24px; color: var(--text-primary); }
+  .stat-label { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+  .stat-delta { font-size: 11px; margin-top: 4px; }
+  .stat-delta.up { color: var(--green); }
+  .stat-delta.warn { color: var(--amber); }
+
+  .section-title {
+    font-family: 'Syne', sans-serif;
+    font-weight: 600; font-size: 13px; color: var(--text-secondary);
+    text-transform: uppercase; letter-spacing: 0.06em;
+    margin-bottom: 10px;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+
+  .section-title a { font-size: 11px; color: var(--accent); cursor: pointer; text-transform: none; letter-spacing: 0; font-weight: 400; font-family: 'DM Sans', sans-serif; }
+
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .three-col { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; }
+
+  /* AI Summary block */
+  .ai-summary-block {
+    background: var(--bg-card); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 16px;
+  }
+
+  .ai-summary-header {
+    display: flex; align-items: center; gap: 8px;
+    margin-bottom: 12px;
+  }
+
+  .ai-chip {
+    display: inline-flex; align-items: center; gap: 5px;
+    background: var(--accent-soft); border: 1px solid var(--border-accent);
+    padding: 3px 10px; border-radius: 20px;
+    font-size: 11px; font-weight: 600; color: var(--accent);
+  }
+
+  .ai-summary-text {
+    font-size: 13px; color: var(--text-secondary); line-height: 1.65;
+    border-left: 2px solid var(--accent); padding-left: 12px;
+  }
+
+  .ai-summary-text p + p { margin-top: 8px; }
+
+  /* Task list */
+  .task-item {
+    display: flex; align-items: center; gap: 10px;
+    padding: 9px 12px; background: var(--bg-card);
+    border: 1px solid var(--border); border-radius: var(--radius-sm);
+    margin-bottom: 6px; cursor: pointer; transition: border-color 0.15s;
+  }
+  .task-item:hover { border-color: var(--border-accent); }
+
+  .task-check {
+    width: 16px; height: 16px; border-radius: 4px;
+    border: 1.5px solid var(--text-muted); flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 10px; transition: all 0.15s;
+  }
+  .task-check.done { background: var(--accent); border-color: var(--accent); color: #fff; }
+
+  .task-name { flex: 1; font-size: 13px; }
+  .task-name.done { text-decoration: line-through; color: var(--text-muted); }
+
+  .task-meta { display: flex; align-items: center; gap: 6px; }
+  .task-due { font-size: 11px; color: var(--text-muted); }
+  .task-due.soon { color: var(--amber); }
+  .task-due.overdue { color: var(--red); }
+
+  /* Member contrib */
+  .member-row {
+    display: flex; align-items: center; gap: 10px;
+    padding: 8px 0; border-bottom: 1px solid var(--border);
+  }
+  .member-row:last-child { border-bottom: none; }
+
+  .member-name { font-size: 13px; flex: 1; }
+  .member-tasks { font-size: 11px; color: var(--text-muted); }
+
+  .prog-bar { flex: 1; height: 4px; background: var(--border); border-radius: 4px; overflow: hidden; max-width: 80px; }
+  .prog-fill { height: 100%; border-radius: 4px; transition: width 0.4s; }
+
+  /* Scheduler */
+  .schedule-item {
+    background: var(--bg-card); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 12px 14px;
+    display: flex; align-items: center; gap: 12px;
+    margin-bottom: 8px;
+  }
+
+  .sched-time {
+    text-align: center; flex-shrink: 0; width: 44px;
+  }
+  .sched-time .date { font-family: 'Syne', sans-serif; font-size: 18px; font-weight: 700; color: var(--text-primary); line-height: 1; }
+  .sched-time .month { font-size: 10px; color: var(--text-muted); text-transform: uppercase; }
+
+  .sched-info { flex: 1; }
+  .sched-title { font-size: 13.5px; font-weight: 500; }
+  .sched-loc { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+
+  .vote-chips { display: flex; gap: 5px; margin-top: 8px; }
+
+  .vote-chip {
+    font-size: 11px; padding: 3px 10px; border-radius: 20px;
+    cursor: pointer; border: 1px solid var(--border); color: var(--text-muted);
+    transition: all 0.15s; background: transparent;
+  }
+  .vote-chip.yes { border-color: var(--green); color: var(--green); }
+  .vote-chip.no { border-color: var(--red); color: var(--red); }
+  .vote-chip.maybe { border-color: var(--amber); color: var(--amber); }
+  .vote-chip:hover { opacity: 0.8; }
+
+  .vote-status { font-size: 11px; color: var(--text-muted); display: flex; align-items: center; gap: 4px; }
+  .vote-dot { width: 6px; height: 6px; border-radius: 50%; }
+  .vote-dot.yes { background: var(--green); }
+  .vote-dot.no { background: var(--red); }
+  .vote-dot.maybe { background: var(--amber); }
+
+  /* Active view toggle */
+  .chat-view.active { display: flex; }
+  .chat-view { display: none; }
+  .chat-view.active { display: flex; }
+
+  /* Tab content areas */
+  .tab-content { display: none; flex: 1; flex-direction: column; min-height: 0; overflow: hidden; }
+  .tab-content.active { display: flex; }
+
+  /* Scrollbar */
+  .dashboard-view::-webkit-scrollbar { width: 4px; }
+  .dashboard-view::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+
+</style>
+</head>
+<body>
+
+<!-- Far left rail (group/server icons) -->
+<div class="rail">
+  <div class="rail-icon g1 active" title="CS3240 Group A">CS</div>
+  <div class="rail-icon g2" title="Maths Group B">MA<div class="dot"></div></div>
+  <div class="rail-icon g3" title="HCI Project">HC</div>
+  <div class="rail-divider"></div>
+  <div class="rail-icon add-btn" title="Join or create group">+</div>
+</div>
+
+<!-- Channel sidebar -->
+<div class="sidebar">
+  <div class="sidebar-header">
+    <div class="group-name"><span class="crown">👑</span> CS3240 – Group A</div>
+    <div class="group-meta">5 members · Assignment due Apr 3</div>
+  </div>
+
+  <div class="sidebar-section">
+    <div class="section-label">Text Channels <span class="add">+</span></div>
+    <div class="channel-item active" onclick="switchChannel(this, 'general')">
+      <span class="channel-icon">#</span> general
+      <span class="channel-badge">3</span>
+    </div>
+    <div class="channel-item" onclick="switchChannel(this, 'resources')">
+      <span class="channel-icon">#</span> resources
+    </div>
+  </div>
+
+  <div class="sidebar-section">
+    <div class="section-label">Members <span class="add">+</span></div>
+    <div class="channel-item">
+      <div class="avatar av1" style="width:22px;height:22px;font-size:9px;flex-shrink:0">AJ</div>
+      <span style="font-size:13px">Alex (you)</span>
+    </div>
+    <div class="channel-item">
+      <div class="avatar av2" style="width:22px;height:22px;font-size:9px;flex-shrink:0">SK</div>
+      <span style="font-size:13px">Sara</span>
+    </div>
+    <div class="channel-item">
+      <div class="avatar av3" style="width:22px;height:22px;font-size:9px;flex-shrink:0">MR</div>
+      <span style="font-size:13px">Marcus</span>
+    </div>
+    <div class="channel-item">
+      <div class="avatar av4" style="width:22px;height:22px;font-size:9px;flex-shrink:0">JL</div>
+      <span style="font-size:13px">Jess</span>
+    </div>
+    <div class="channel-item" style="color:var(--text-muted)">
+      <div style="width:22px;height:22px;border-radius:50%;border:1.5px dashed var(--text-muted);display:flex;align-items:center;justify-content:center;font-size:11px;flex-shrink:0">?</div>
+      <span style="font-size:13px">Offline · Tom</span>
+    </div>
+  </div>
+
+  <div class="user-card">
+    <div class="avatar av1">AJ</div>
+    <div class="user-info">
+      <div class="user-name">Alex Johnson</div>
+      <div class="user-status">● Online</div>
+    </div>
+    <div class="user-actions">
+      <button class="icon-btn" title="Settings">⚙</button>
+    </div>
+  </div>
+</div>
+
+<!-- Feature panel (middle column) -->
+<div class="feature-panel" id="featurePanel">
+  <div class="panel-toggle" onclick="togglePanel()" id="panelToggle">▶</div>
+
+  <div class="panel-section-label">Overview</div>
+
+  <button class="feature-btn active" data-tip="AI Summary" onclick="switchTab('dashboard')" id="btn-dashboard">
+    <span>✦</span>
+    <span class="label">AI Summary</span>
+  </button>
+
+  <div class="panel-divider"></div>
+  <div class="panel-section-label">Work</div>
+
+  <button class="feature-btn has-notif" data-tip="Tasks" onclick="switchTab('tasks')" id="btn-tasks">
+    <span>☑</span>
+    <span class="label">My Tasks</span>
+    <span class="notif">2</span>
+  </button>
+
+  <button class="feature-btn" data-tip="Files" onclick="switchTab('files')" id="btn-files">
+    <span>📁</span>
+    <span class="label">Files</span>
+  </button>
+
+  <div class="panel-divider"></div>
+  <div class="panel-section-label">Group</div>
+
+  <button class="feature-btn has-notif" data-tip="Scheduler" onclick="switchTab('scheduler')" id="btn-scheduler">
+    <span>📅</span>
+    <span class="label">Scheduler</span>
+    <span class="notif">1</span>
+  </button>
+
+  <button class="feature-btn" data-tip="Contributions" onclick="switchTab('contrib')" id="btn-contrib">
+    <span>📊</span>
+    <span class="label">Contributions</span>
+  </button>
+</div>
+
+<!-- Main content -->
+<div class="main">
+
+  <!-- Top bar -->
+  <div class="topbar">
+    <span class="topbar-icon">#</span>
+    <span class="topbar-name" id="topbar-name">general</span>
+    <span class="topbar-desc" id="topbar-desc">CS3240 main channel · 5 members</span>
+    <div class="topbar-actions">
+      <button class="pill-btn">🔔 Mute</button>
+      <button class="pill-btn">⋯ More</button>
+    </div>
+  </div>
+
+  <!-- CHAT TAB -->
+  <div class="tab-content active" id="tab-chat">
+    <div class="chat-view active">
+      <div class="messages" id="messages">
+
+        <div class="date-divider">Today</div>
+
+        <div class="msg-group">
+          <div class="avatar av2 msg-avatar">SK</div>
+          <div class="msg-body">
+            <div class="msg-meta">
+              <span class="msg-author">Sara Kim</span>
+              <span class="msg-time">9:14 AM</span>
+            </div>
+            <div class="msg-text">Hey everyone, shall we split the report sections today? I can take the literature review 📚</div>
+          </div>
+        </div>
+
+        <div class="msg-group">
+          <div class="avatar av3 msg-avatar">MR</div>
+          <div class="msg-body">
+            <div class="msg-meta">
+              <span class="msg-author">Marcus Reid</span>
+              <span class="msg-time">9:17 AM</span>
+            </div>
+            <div class="msg-text">Sounds good. I'll handle the methodology section. <span class="mention">@Jess</span> can you do the data analysis part?</div>
+          </div>
+        </div>
+
+        <div class="ai-banner">
+          <span class="ai-icon">✦</span>
+          <div class="ai-text">
+            <strong>AI detected 2 tasks</strong> from this conversation — Sara: Literature review, Marcus: Methodology section. Want to add them to My Tasks?
+            <div class="ai-actions">
+              <button class="ai-action-btn">✓ Add both</button>
+              <button class="ai-action-btn">Edit first</button>
+              <button class="ai-action-btn">Dismiss</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="msg-group">
+          <div class="avatar av4 msg-avatar">JL</div>
+          <div class="msg-body">
+            <div class="msg-meta">
+              <span class="msg-author">Jess Liu</span>
+              <span class="msg-time">9:22 AM</span>
+            </div>
+            <div class="msg-text">Sure! Also uploading the dataset we talked about last time 👇</div>
+            <div class="file-chip">
+              <span class="file-icon">📊</span>
+              survey_results_v2.xlsx · 2.4 MB
+            </div>
+          </div>
+        </div>
+
+        <div class="msg-group">
+          <div class="avatar av1 msg-avatar">AJ</div>
+          <div class="msg-body">
+            <div class="msg-meta">
+              <span class="msg-author you">Alex (you)</span>
+              <span class="msg-time">9:30 AM</span>
+            </div>
+            <div class="msg-text">I'll take the introduction and conclusion then. Also we should meet before submission — <span class="task-ref">📅 Proposed meeting Apr 1</span></div>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="chat-input-area">
+        <div class="chat-input-box">
+          <span style="color:var(--text-muted);font-size:18px;cursor:pointer" title="Attach file">+</span>
+          <input class="chat-input" id="chatInput" placeholder="Message #general" onkeydown="sendMsg(event)">
+          <div class="input-actions">
+            <button class="icon-btn" title="Emoji">😊</button>
+            <button class="icon-btn" title="Mention">@</button>
+            <button class="icon-btn" onclick="sendMsgBtn()" title="Send" style="color:var(--accent)">➤</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- DASHBOARD TAB -->
+  <div class="tab-content" id="tab-dashboard">
+    <div class="dashboard-view active">
+      <div>
+        <div class="dash-greeting">Good morning, Alex ✦</div>
+        <div class="dash-sub">CS3240 Group A · Assignment due in <span style="color:var(--amber)">6 days</span></div>
+      </div>
+
+      <!-- Stats row -->
+      <div class="stat-row">
+        <div class="stat-card">
+          <div class="stat-icon">☑</div>
+          <div class="stat-value">3<span style="font-size:14px;color:var(--text-muted)">/8</span></div>
+          <div class="stat-label">Tasks done</div>
+          <div class="stat-delta warn">5 remaining</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon">📅</div>
+          <div class="stat-value">1</div>
+          <div class="stat-label">Pending vote</div>
+          <div class="stat-delta warn">Needs response</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon">📁</div>
+          <div class="stat-value">7</div>
+          <div class="stat-label">Files shared</div>
+          <div class="stat-delta up">+2 this week</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon">💬</div>
+          <div class="stat-value">42</div>
+          <div class="stat-label">Messages today</div>
+          <div class="stat-delta up">Group is active</div>
+        </div>
+      </div>
+
+      <!-- AI Summary -->
+      <div class="ai-summary-block">
+        <div class="ai-summary-header">
+          <span class="ai-chip">✦ AI Summary</span>
+          <span style="font-size:11px;color:var(--text-muted)">Updated just now</span>
+        </div>
+        <div class="ai-summary-text">
+          <p>Your group made good progress today — Sara and Marcus have claimed their sections, and Jess uploaded the dataset. You're on track but the data analysis task (Jess) and introduction (you) haven't been started yet.</p>
+          <p>There's a pending meeting vote for <strong>Apr 1</strong> — only Marcus has responded so far. The submission deadline is <strong>Apr 3</strong>, leaving limited buffer time. Consider syncing before the weekend.</p>
+        </div>
+      </div>
+
+      <!-- Two columns: tasks + scheduler -->
+      <div class="two-col">
+        <div>
+          <div class="section-title">Upcoming tasks <a>View all →</a></div>
+          <div class="task-item">
+            <div class="task-check done">✓</div>
+            <span class="task-name done">Set up shared drive</span>
+            <div class="task-meta"><span class="task-due">Mar 25</span><div class="avatar av1" style="width:18px;height:18px;font-size:8px">AJ</div></div>
+          </div>
+          <div class="task-item">
+            <div class="task-check"></div>
+            <span class="task-name">Literature review</span>
+            <div class="task-meta"><span class="task-due soon">Apr 1</span><div class="avatar av2" style="width:18px;height:18px;font-size:8px">SK</div></div>
+          </div>
+          <div class="task-item">
+            <div class="task-check"></div>
+            <span class="task-name">Methodology section</span>
+            <div class="task-meta"><span class="task-due soon">Apr 1</span><div class="avatar av3" style="width:18px;height:18px;font-size:8px">MR</div></div>
+          </div>
+          <div class="task-item">
+            <div class="task-check"></div>
+            <span class="task-name">Data analysis</span>
+            <div class="task-meta"><span class="task-due overdue">Overdue</span><div class="avatar av4" style="width:18px;height:18px;font-size:8px">JL</div></div>
+          </div>
+        </div>
+
+        <div>
+          <div class="section-title">Meetings <a>Propose →</a></div>
+          <div class="schedule-item">
+            <div class="sched-time">
+              <div class="date">1</div>
+              <div class="month">Apr</div>
+            </div>
+            <div class="sched-info">
+              <div class="sched-title">Final review sync</div>
+              <div class="sched-loc">📍 Library Room 3B · 2:00 PM</div>
+              <div class="vote-chips">
+                <button class="vote-chip yes" onclick="this.style.background='var(--green-soft)'">✓ I'm in</button>
+                <button class="vote-chip no">✗ Can't make it</button>
+                <button class="vote-chip maybe">? Not sure</button>
+              </div>
+            </div>
+            <div style="font-size:11px;color:var(--text-muted);text-align:right;flex-shrink:0">
+              <div style="display:flex;gap:3px;justify-content:flex-end;margin-bottom:3px">
+                <span style="color:var(--green)">✓1</span>
+                <span style="color:var(--text-muted)">?3</span>
+              </div>
+              <div style="font-size:10px">4 pending</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Contributions -->
+      <div>
+        <div class="section-title">Contributions <a>Full view →</a></div>
+        <div class="ai-summary-block" style="padding:12px 16px">
+          <div class="member-row">
+            <div class="avatar av1" style="width:26px;height:26px;font-size:10px">AJ</div>
+            <span class="member-name">Alex (you)</span>
+            <span class="member-tasks">2 tasks</span>
+            <div class="prog-bar"><div class="prog-fill" style="width:50%;background:var(--accent)"></div></div>
+            <span style="font-size:11px;color:var(--text-muted)">50%</span>
+          </div>
+          <div class="member-row">
+            <div class="avatar av2" style="width:26px;height:26px;font-size:10px">SK</div>
+            <span class="member-name">Sara Kim</span>
+            <span class="member-tasks">2 tasks</span>
+            <div class="prog-bar"><div class="prog-fill" style="width:65%;background:var(--blue)"></div></div>
+            <span style="font-size:11px;color:var(--text-muted)">65%</span>
+          </div>
+          <div class="member-row">
+            <div class="avatar av3" style="width:26px;height:26px;font-size:10px">MR</div>
+            <span class="member-name">Marcus Reid</span>
+            <span class="member-tasks">2 tasks</span>
+            <div class="prog-bar"><div class="prog-fill" style="width:40%;background:var(--green)"></div></div>
+            <span style="font-size:11px;color:var(--text-muted)">40%</span>
+          </div>
+          <div class="member-row">
+            <div class="avatar av4" style="width:26px;height:26px;font-size:10px">JL</div>
+            <span class="member-name">Jess Liu</span>
+            <span class="member-tasks">2 tasks</span>
+            <div class="prog-bar"><div class="prog-fill" style="width:20%;background:var(--amber)"></div></div>
+            <span style="font-size:11px;color:var(--text-muted)">20%</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- TASKS TAB -->
+  <div class="tab-content" id="tab-tasks">
+    <div class="dashboard-view active">
+      <div class="dash-greeting" style="font-size:18px">My Tasks</div>
+      <div class="ai-summary-block">
+        <div class="ai-summary-header"><span class="ai-chip">✦ AI assigned</span></div>
+        <div class="ai-summary-text"><p>2 tasks were auto-assigned to you from chat. Tap any task to view the conversation it came from.</p></div>
+      </div>
+      <div class="task-item"><div class="task-check"></div><span class="task-name">Write introduction section</span><div class="task-meta"><span class="task-due soon">Apr 2</span></div></div>
+      <div class="task-item"><div class="task-check"></div><span class="task-name">Write conclusion section</span><div class="task-meta"><span class="task-due soon">Apr 2</span></div></div>
+      <div class="task-item"><div class="task-check done">✓</div><span class="task-name done">Set up shared drive</span><div class="task-meta"><span class="task-due">Mar 25</span></div></div>
+    </div>
+  </div>
+
+  <!-- FILES TAB -->
+  <div class="tab-content" id="tab-files">
+    <div class="dashboard-view active">
+      <div class="dash-greeting" style="font-size:18px">Files</div>
+      <div class="task-item"><span class="file-icon" style="font-size:18px">📊</span><span class="task-name">survey_results_v2.xlsx</span><div class="task-meta"><span class="task-due">Jess · 9:22 AM</span></div></div>
+      <div class="task-item"><span class="file-icon" style="font-size:18px">📄</span><span class="task-name">project_brief_final.pdf</span><div class="task-meta"><span class="task-due">Sara · Mar 25</span></div></div>
+      <div class="task-item"><span class="file-icon" style="font-size:18px">🖼</span><span class="task-name">wireframe_v1.png</span><div class="task-meta"><span class="task-due">Alex · Mar 24</span></div></div>
+    </div>
+  </div>
+
+  <!-- SCHEDULER TAB -->
+  <div class="tab-content" id="tab-scheduler">
+    <div class="dashboard-view active">
+      <div class="dash-greeting" style="font-size:18px">Scheduler</div>
+      <div class="schedule-item" style="flex-direction:column;align-items:flex-start;gap:10px">
+        <div style="display:flex;gap:12px;width:100%;align-items:center">
+          <div class="sched-time"><div class="date">1</div><div class="month">Apr</div></div>
+          <div class="sched-info">
+            <div class="sched-title">Final review sync</div>
+            <div class="sched-loc">📍 Library Room 3B · 2:00 PM</div>
+          </div>
+          <div style="margin-left:auto;font-size:11px;color:var(--text-muted)">Proposed by Alex</div>
+        </div>
+        <div style="display:flex;gap:12px;font-size:12px;padding-left:56px">
+          <span style="color:var(--green)">✓ Marcus</span>
+          <span style="color:var(--text-muted)">? Sara · Jess · Tom</span>
+        </div>
+        <div class="vote-chips" style="padding-left:56px">
+          <button class="vote-chip yes">✓ Yes, I can make it</button>
+          <button class="vote-chip no">✗ Not available, sorry!</button>
+          <button class="vote-chip maybe">? Can't tell right now</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CONTRIBUTIONS TAB -->
+  <div class="tab-content" id="tab-contrib">
+    <div class="dashboard-view active">
+      <div class="dash-greeting" style="font-size:18px">Contributions</div>
+      <div class="ai-summary-block">
+        <div class="ai-summary-header"><span class="ai-chip">✦ AI insight</span></div>
+        <div class="ai-summary-text"><p>Contributions are <strong>slightly uneven</strong> — Jess has the lowest progress and an overdue task. Consider checking in with them before the deadline.</p></div>
+      </div>
+      <div class="ai-summary-block" style="padding:16px">
+        <div class="member-row" style="padding:10px 0">
+          <div class="avatar av1">AJ</div>
+          <div style="flex:1"><div class="member-name">Alex (you)</div><div class="member-tasks" style="font-size:12px;margin-top:2px">Introduction · Conclusion · Shared drive</div></div>
+          <div class="prog-bar" style="max-width:120px"><div class="prog-fill" style="width:50%;background:var(--accent)"></div></div>
+          <span style="font-size:12px;color:var(--text-muted);min-width:30px;text-align:right">50%</span>
+        </div>
+        <div class="member-row" style="padding:10px 0">
+          <div class="avatar av2">SK</div>
+          <div style="flex:1"><div class="member-name">Sara Kim</div><div class="member-tasks" style="font-size:12px;margin-top:2px">Literature review · Research plan</div></div>
+          <div class="prog-bar" style="max-width:120px"><div class="prog-fill" style="width:65%;background:var(--blue)"></div></div>
+          <span style="font-size:12px;color:var(--text-muted);min-width:30px;text-align:right">65%</span>
+        </div>
+        <div class="member-row" style="padding:10px 0">
+          <div class="avatar av3">MR</div>
+          <div style="flex:1"><div class="member-name">Marcus Reid</div><div class="member-tasks" style="font-size:12px;margin-top:2px">Methodology section · Diagrams</div></div>
+          <div class="prog-bar" style="max-width:120px"><div class="prog-fill" style="width:40%;background:var(--green)"></div></div>
+          <span style="font-size:12px;color:var(--text-muted);min-width:30px;text-align:right">40%</span>
+        </div>
+        <div class="member-row" style="padding:10px 0;border-bottom:none">
+          <div class="avatar av4">JL</div>
+          <div style="flex:1"><div class="member-name">Jess Liu</div><div class="member-tasks" style="font-size:12px;margin-top:2px;color:var(--red)">⚠ Data analysis overdue</div></div>
+          <div class="prog-bar" style="max-width:120px"><div class="prog-fill" style="width:20%;background:var(--amber)"></div></div>
+          <span style="font-size:12px;color:var(--text-muted);min-width:30px;text-align:right">20%</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  const topbarNames = {
+    'general': ['general', 'CS3240 main channel · 5 members'],
+    'resources': ['resources', 'Share links, papers and references'],
+  };
+
+  function switchChannel(el, name) {
+    document.querySelectorAll('.channel-item').forEach(i => i.classList.remove('active'));
+    el.classList.add('active');
+    if (topbarNames[name]) {
+      document.getElementById('topbar-name').textContent = topbarNames[name][0];
+      document.getElementById('topbar-desc').textContent = topbarNames[name][1];
+    }
+    switchTab('chat');
+  }
+
+  function switchTab(tab) {
+    document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.feature-btn').forEach(b => b.classList.remove('active'));
+    const target = document.getElementById('tab-' + tab);
+    if (target) target.classList.add('active');
+    const btn = document.getElementById('btn-' + tab);
+    if (btn) btn.classList.add('active');
+    if (tab === 'chat') {
+      document.querySelectorAll('.channel-item')[0].classList.add('active');
+    }
+  }
+
+  function togglePanel() {
+    const panel = document.getElementById('featurePanel');
+    const toggle = document.getElementById('panelToggle');
+    panel.classList.toggle('expanded');
+    toggle.textContent = panel.classList.contains('expanded') ? '◀' : '▶';
+  }
+
+  function sendMsg(e) {
+    if (e.key === 'Enter') sendMsgBtn();
+  }
+
+  function sendMsgBtn() {
+    const input = document.getElementById('chatInput');
+    const text = input.value.trim();
+    if (!text) return;
+    const msgs = document.getElementById('messages');
+    const group = document.createElement('div');
+    group.className = 'msg-group';
+    group.innerHTML = `
+      <div class="avatar av1 msg-avatar">AJ</div>
+      <div class="msg-body">
+        <div class="msg-meta">
+          <span class="msg-author you">Alex (you)</span>
+          <span class="msg-time">Just now</span>
+        </div>
+        <div class="msg-text">${text}</div>
+      </div>`;
+    msgs.appendChild(group);
+    input.value = '';
+    msgs.scrollTop = msgs.scrollHeight;
+  }
+</script>
+</body>
+</html>
