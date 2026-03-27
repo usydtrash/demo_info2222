@@ -288,16 +288,6 @@
       Continue with Google
     </button>
 
-    <button class="auth-btn" onclick="handleMicrosoftSignIn()">
-      <svg viewBox="0 0 21 21" xmlns="http://www.w3.org/2000/svg" width="18" height="18">
-        <rect x="1" y="1" width="9" height="9" fill="#f25022"/>
-        <rect x="11" y="1" width="9" height="9" fill="#7fba00"/>
-        <rect x="1" y="11" width="9" height="9" fill="#00a4ef"/>
-        <rect x="11" y="11" width="9" height="9" fill="#ffb900"/>
-      </svg>
-      Continue with Microsoft
-    </button>
-
     <div class="divider">or join with invite code</div>
 
     <div class="invite-section">
@@ -322,7 +312,7 @@
 
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-app.js";
-  import { getAuth, signInWithPopup, GoogleAuthProvider, OAuthProvider, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-auth.js";
+  import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-auth.js";
 
   const firebaseConfig = {
     apiKey: "AIzaSyA9tEdIrblFp4JwClZ7smBizQF8crDdyEY",
@@ -337,7 +327,6 @@
   const app = initializeApp(firebaseConfig);
   const auth = getAuth(app);
   const googleProvider = new GoogleAuthProvider();
-  const microsoftProvider = new OAuthProvider('microsoft.com');
 
   onAuthStateChanged(auth, (user) => {
     if (user) {
@@ -361,7 +350,6 @@
   }
 
   window.handleGoogleSignIn = () => signInWith(googleProvider, 'Google');
-  window.handleMicrosoftSignIn = () => signInWith(microsoftProvider, 'Microsoft');
 
   window.handleInvite = function() {
     const code = document.getElementById('inviteCode').value.trim();
