@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>StudySpace — Set Up Your Profile</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,300&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg-base: #0e0f13;
+    --bg-sidebar: #13141a;
+    --bg-panel: #16181f;
+    --bg-main: #1a1c25;
+    --bg-card: #1f2130;
+    --bg-input: #252837;
+    --accent: #7c6aff;
+    --accent-soft: rgba(124, 106, 255, 0.12);
+    --accent-mid: rgba(124, 106, 255, 0.25);
+    --green: #4ade80;
+    --green-soft: rgba(74, 222, 128, 0.12);
+    --amber: #fbbf24;
+    --amber-soft: rgba(251, 191, 36, 0.12);
+    --red: #f87171;
+    --text-primary: #e8e9f0;
+    --text-secondary: #8b8fa8;
+    --text-muted: #555870;
+    --border: rgba(255,255,255,0.06);
+    --border-accent: rgba(124, 106, 255, 0.3);
+    --radius: 10px;
+    --radius-sm: 6px;
+  }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg-base);
+    color: var(--text-primary);
+    min-height: 100vh;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px; padding: 40px 20px;
+  }
+
+  .profile-container { width: 100%; max-width: 580px; animation: slideUp 0.5s ease-out; }
+
+  @keyframes slideUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .progress-bar { display: flex; align-items: center; margin-bottom: 40px; }
+  .progress-step { display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--text-muted); white-space: nowrap; }
+  .progress-step.active { color: var(--accent); }
+  .progress-step.done { color: var(--green); }
+
+  .step-dot {
+    width: 28px; height: 28px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px; font-weight: 600;
+    border: 2px solid var(--text-muted); flex-shrink: 0;
+  }
+
+  .progress-step.done .step-dot { background: var(--green); border-color: var(--green); color: #fff; }
+  .progress-step.active .step-dot { border-color: var(--accent); background: var(--accent-soft); color: var(--accent); }
+  .progress-line { flex: 1; height: 2px; background: var(--border); margin: 0 12px; }
+  .progress-line.done { background: var(--green); }
+
+  .profile-header { margin-bottom: 32px; }
+
+  .profile-logo {
+    display: inline-flex; align-items: center; gap: 8px;
+    margin-bottom: 20px; font-family: 'Syne', sans-serif;
+    font-weight: 700; font-size: 16px; color: var(--text-secondary);
+  }
+
+  .profile-logo .icon {
+    width: 32px; height: 32px; border-radius: 10px;
+    background: linear-gradient(135deg, #7c6aff, #a855f7);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px; color: #fff;
+  }
+
+  .profile-title { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 26px; margin-bottom: 6px; }
+  .profile-subtitle { font-size: 14px; color: var(--text-muted); line-height: 1.5; }
+
+  .avatar-section {
+    display: flex; align-items: center; gap: 16px;
+    margin-bottom: 28px; padding: 16px;
+    background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius);
+  }
+
+  .avatar-large {
+    width: 64px; height: 64px; border-radius: 50%;
+    background: linear-gradient(135deg, #7c6aff, #a855f7);
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Syne', sans-serif; font-weight: 700; font-size: 22px;
+    color: #fff; flex-shrink: 0; position: relative; overflow: hidden;
+  }
+
+  .avatar-large img { width: 100%; height: 100%; object-fit: cover; }
+
+  .avatar-badge {
+    position: absolute; bottom: 0; right: 0;
+    width: 20px; height: 20px; border-radius: 50%;
+    background: var(--accent); border: 2px solid var(--bg-card);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 10px; color: #fff; cursor: pointer;
+  }
+
+  .avatar-info { flex: 1; }
+  .avatar-name { font-family: 'Syne', sans-serif; font-weight: 600; font-size: 16px; margin-bottom: 2px; }
+  .avatar-email { font-size: 12px; color: var(--text-muted); }
+  .avatar-source { font-size: 11px; color: var(--green); margin-top: 4px; display: flex; align-items: center; gap: 4px; }
+
+  .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .form-group { display: flex; flex-direction: column; gap: 6px; }
+  .form-group.full-width { grid-column: 1 / -1; }
+
+  .form-label { font-size: 12px; font-weight: 500; color: var(--text-secondary); display: flex; align-items: center; gap: 4px; }
+  .form-label .required { color: var(--red); font-size: 11px; }
+
+  .form-input, .form-select {
+    background: var(--bg-input); border: 1px solid var(--border);
+    border-radius: var(--radius-sm); padding: 11px 12px;
+    color: var(--text-primary); font-family: 'DM Sans', sans-serif;
+    font-size: 13.5px; outline: none; transition: border-color 0.15s; width: 100%;
+  }
+
+  .form-input::placeholder { color: var(--text-muted); }
+  .form-input:focus, .form-select:focus { border-color: var(--border-accent); }
+
+  .form-select {
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg width='12' height='8' viewBox='0 0 12 8' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1.5L6 6.5L11 1.5' stroke='%23555870' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat; background-position: right 12px center;
+    padding-right: 32px; cursor: pointer;
+  }
+
+  .form-select option { background: var(--bg-card); color: var(--text-primary); }
+  .form-hint { font-size: 11px; color: var(--text-muted); line-height: 1.4; }
+  .display-name-section { margin-bottom: 24px; }
+  .display-name-note { font-size: 11px; color: var(--text-muted); margin-top: 4px; }
+
+  .form-actions { display: flex; align-items: center; justify-content: space-between; margin-top: 32px; gap: 12px; }
+
+  .btn-skip {
+    padding: 11px 24px; border-radius: var(--radius);
+    border: 1px solid var(--border); background: transparent;
+    color: var(--text-muted); font-family: 'DM Sans', sans-serif;
+    font-size: 13.5px; cursor: pointer; transition: border-color 0.15s, color 0.15s;
+  }
+
+  .btn-skip:hover { border-color: var(--text-muted); color: var(--text-secondary); }
+
+  .btn-continue {
+    padding: 11px 32px; border-radius: var(--radius); border: none;
+    background: linear-gradient(135deg, #7c6aff, #a855f7); color: #fff;
+    font-family: 'DM Sans', sans-serif; font-size: 13.5px; font-weight: 600;
+    cursor: pointer; transition: opacity 0.15s, transform 0.15s;
+    display: flex; align-items: center; gap: 8px;
+  }
+
+  .btn-continue:hover { opacity: 0.9; transform: translateY(-1px); }
+  .btn-continue:active { transform: translateY(0); }
+
+  .loading-overlay {
+    position: fixed; inset: 0; background: var(--bg-base);
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    z-index: 1000; opacity: 0; pointer-events: none; transition: opacity 0.3s;
+  }
+
+  .loading-overlay.active { opacity: 1; pointer-events: all; }
+
+  .spinner {
+    width: 36px; height: 36px;
+    border: 3px solid var(--border); border-top-color: var(--accent);
+    border-radius: 50%; animation: spin 0.8s linear infinite; margin-bottom: 16px;
+  }
+
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .loading-text { font-size: 14px; color: var(--text-secondary); margin-bottom: 4px; }
+  .loading-sub { font-size: 12px; color: var(--text-muted); }
+
+  .form-input.error, .form-select.error { border-color: var(--red); }
+
+  @media (max-width: 600px) {
+    .form-grid { grid-template-columns: 1fr; }
+    .profile-container { max-width: 100%; }
+    body { padding: 24px 16px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="profile-container">
+  <div class="progress-bar">
+    <div class="progress-step done"><div class="step-dot">✓</div><span>Sign In</span></div>
+    <div class="progress-line done"></div>
+    <div class="progress-step active"><div class="step-dot">2</div><span>Profile</span></div>
+    <div class="progress-line"></div>
+    <div class="progress-step"><div class="step-dot">3</div><span>Join Group</span></div>
+  </div>
+
+  <div class="profile-header">
+    <div class="profile-logo"><div class="icon">S</div> StudySpace</div>
+    <h1 class="profile-title">Set up your profile</h1>
+    <p class="profile-subtitle">Tell us a bit about yourself so your groupmates can find and recognize you.</p>
+  </div>
+
+  <div class="avatar-section">
+    <div class="avatar-large" id="avatarLarge">
+      <span id="avatarInitials">??</span>
+      <div class="avatar-badge">✎</div>
+    </div>
+    <div class="avatar-info">
+      <div class="avatar-name" id="avatarName">Loading…</div>
+      <div class="avatar-email" id="avatarEmail"></div>
+      <div class="avatar-source">✓ Imported from Google</div>
+    </div>
+  </div>
+
+  <form id="profileForm" onsubmit="return handleSubmit(event)">
+    <div class="display-name-section">
+      <div class="form-group">
+        <label class="form-label">Display Name <span class="required">*</span></label>
+        <input type="text" class="form-input" id="displayName" value="" required>
+        <div class="display-name-note">This is how other students will see you in group chats.</div>
+      </div>
+    </div>
+
+    <div class="form-grid">
+      <div class="form-group">
+        <label class="form-label">Student ID <span class="required">*</span></label>
+        <input type="text" class="form-input" id="studentId" placeholder="e.g. 520412345" required>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">University / School <span class="required">*</span></label>
+        <select class="form-select" id="university" required>
+          <option value="" disabled selected>Select your university</option>
+          <option>University of Sydney</option>
+          <option>University of Melbourne</option>
+          <option>UNSW Sydney</option>
+          <option>University of Queensland</option>
+          <option>Monash University</option>
+          <option>ANU</option>
+          <option>University of Technology Sydney</option>
+          <option>Other</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Faculty / School <span class="required">*</span></label>
+        <select class="form-select" id="faculty" required>
+          <option value="" disabled selected>Select your faculty</option>
+          <option>Engineering & IT</option>
+          <option>Science</option>
+          <option>Business</option>
+          <option>Arts & Social Sciences</option>
+          <option>Medicine & Health</option>
+          <option>Law</option>
+          <option>Architecture & Design</option>
+          <option>Education</option>
+          <option>Other</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Major <span class="required">*</span></label>
+        <input type="text" class="form-input" id="major" placeholder="e.g. Computer Science" required>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Degree Type</label>
+        <select class="form-select" id="degree">
+          <option value="" disabled selected>Select degree</option>
+          <option>Bachelor's</option>
+          <option>Master's</option>
+          <option>PhD</option>
+          <option>Honours</option>
+          <option>Diploma</option>
+          <option>Other</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Expected Graduation <span class="required">*</span></label>
+        <select class="form-select" id="gradYear" required>
+          <option value="" disabled selected>Select year</option>
+          <option>2025</option>
+          <option>2026</option>
+          <option>2027</option>
+          <option>2028</option>
+          <option>2029</option>
+          <option>2030</option>
+        </select>
+      </div>
+
+      <div class="form-group full-width">
+        <label class="form-label">Short Bio <span style="color:var(--text-muted);font-weight:400">(optional)</span></label>
+        <input type="text" class="form-input" id="bio" placeholder="e.g. 3rd year CS student, interested in HCI and AI" maxlength="120">
+        <div class="form-hint">Max 120 characters. Visible to your groupmates.</div>
+      </div>
+    </div>
+
+    <div class="form-actions">
+      <button type="button" class="btn-skip" onclick="handleSkip()">I'll do this later</button>
+      <button type="submit" class="btn-continue">Continue <span>→</span></button>
+    </div>
+  </form>
+</div>
+
+<div class="loading-overlay" id="loadingOverlay">
+  <div class="spinner"></div>
+  <div class="loading-text">Creating your profile…</div>
+  <div class="loading-sub">You'll be redirected in a moment</div>
+</div>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-app.js";
+  import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-auth.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyA9tEdIrblFp4JwClZ7smBizQF8crDdyEY",
+    authDomain: "info2222-4f3ee.firebaseapp.com",
+    projectId: "info2222-4f3ee",
+    storageBucket: "info2222-4f3ee.firebasestorage.app",
+    messagingSenderId: "792148569952",
+    appId: "1:792148569952:web:d7e9a9c8035d96239d3805",
+    measurementId: "G-FNNJX23WNG"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+
+  function getInitials(name) {
+    if (!name) return '??';
+    return name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2);
+  }
+
+  onAuthStateChanged(auth, (user) => {
+    if (!user) {
+      window.location.href = 'index.html';
+      return;
+    }
+
+    const name = user.displayName || '';
+    const email = user.email || '';
+    const photo = user.photoURL;
+
+    document.getElementById('avatarName').textContent = name;
+    document.getElementById('avatarEmail').textContent = email;
+    document.getElementById('displayName').value = name;
+
+    if (photo) {
+      document.getElementById('avatarInitials').style.display = 'none';
+      const img = document.createElement('img');
+      img.src = photo;
+      img.alt = name;
+      img.referrerPolicy = 'no-referrer';
+      document.getElementById('avatarLarge').prepend(img);
+    } else {
+      document.getElementById('avatarInitials').textContent = getInitials(name);
+    }
+  });
+
+  function saveProfile() {
+    const profile = {
+      displayName: document.getElementById('displayName').value.trim(),
+      studentId: document.getElementById('studentId').value.trim(),
+      university: document.getElementById('university').value,
+      faculty: document.getElementById('faculty').value,
+      major: document.getElementById('major').value.trim(),
+      degree: document.getElementById('degree').value,
+      gradYear: document.getElementById('gradYear').value,
+      bio: document.getElementById('bio').value.trim()
+    };
+    localStorage.setItem('studyspace_profile', JSON.stringify(profile));
+    localStorage.setItem('studyspace_profile_done', 'true');
+  }
+
+  window.handleSubmit = function(e) {
+    e.preventDefault();
+
+    const required = ['displayName', 'studentId', 'university', 'faculty', 'major', 'gradYear'];
+    let valid = true;
+
+    required.forEach(id => {
+      const el = document.getElementById(id);
+      if (!el.value.trim()) {
+        el.classList.add('error');
+        valid = false;
+      } else {
+        el.classList.remove('error');
+      }
+    });
+
+    if (!valid) return;
+
+    saveProfile();
+
+    const overlay = document.getElementById('loadingOverlay');
+    overlay.classList.add('active');
+
+    setTimeout(() => {
+      window.location.href = 'demo.html';
+    }, 1200);
+  };
+
+  window.handleSkip = function() {
+    localStorage.setItem('studyspace_profile_done', 'true');
+
+    const overlay = document.getElementById('loadingOverlay');
+    document.querySelector('.loading-text').textContent = 'Setting up your space…';
+    overlay.classList.add('active');
+
+    setTimeout(() => {
+      window.location.href = 'demo.html';
+    }, 1200);
+  };
+
+  document.querySelectorAll('.form-input, .form-select').forEach(el => {
+    el.addEventListener('input', () => el.classList.remove('error'));
+    el.addEventListener('change', () => el.classList.remove('error'));
+  });
+</script>
+</body>
+</html>

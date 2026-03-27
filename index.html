@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>StudySpace — Sign In</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,300&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg-base: #0e0f13;
+    --bg-sidebar: #13141a;
+    --bg-panel: #16181f;
+    --bg-main: #1a1c25;
+    --bg-card: #1f2130;
+    --bg-input: #252837;
+    --accent: #7c6aff;
+    --accent-soft: rgba(124, 106, 255, 0.12);
+    --accent-mid: rgba(124, 106, 255, 0.25);
+    --green: #4ade80;
+    --green-soft: rgba(74, 222, 128, 0.12);
+    --amber: #fbbf24;
+    --red: #f87171;
+    --text-primary: #e8e9f0;
+    --text-secondary: #8b8fa8;
+    --text-muted: #555870;
+    --border: rgba(255,255,255,0.06);
+    --border-accent: rgba(124, 106, 255, 0.3);
+    --radius: 10px;
+    --radius-sm: 6px;
+  }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg-base);
+    color: var(--text-primary);
+    height: 100vh;
+    display: flex;
+    overflow: hidden;
+    font-size: 14px;
+  }
+
+  .hero {
+    flex: 1;
+    background: linear-gradient(160deg, #13141a 0%, #1a1c25 40%, #1f1535 100%);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 60px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .hero::before {
+    content: '';
+    position: absolute;
+    width: 500px; height: 500px;
+    background: radial-gradient(circle, rgba(124, 106, 255, 0.08) 0%, transparent 70%);
+    top: 20%; left: 30%;
+    pointer-events: none;
+  }
+
+  .hero::after {
+    content: '';
+    position: absolute;
+    width: 300px; height: 300px;
+    background: radial-gradient(circle, rgba(168, 85, 247, 0.06) 0%, transparent 70%);
+    bottom: 10%; right: 20%;
+    pointer-events: none;
+  }
+
+  .hero-content {
+    position: relative; z-index: 1;
+    max-width: 460px; text-align: center;
+  }
+
+  .logo {
+    display: inline-flex; align-items: center;
+    gap: 10px; margin-bottom: 40px;
+  }
+
+  .logo-icon {
+    width: 48px; height: 48px; border-radius: 14px;
+    background: linear-gradient(135deg, #7c6aff, #a855f7);
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Syne', sans-serif; font-weight: 800; font-size: 20px; color: #fff;
+  }
+
+  .logo-text {
+    font-family: 'Syne', sans-serif; font-weight: 700;
+    font-size: 24px; color: var(--text-primary);
+  }
+
+  .hero-title {
+    font-family: 'Syne', sans-serif; font-weight: 800;
+    font-size: 38px; line-height: 1.15;
+    color: var(--text-primary); margin-bottom: 16px;
+  }
+
+  .hero-title .accent {
+    background: linear-gradient(135deg, #7c6aff, #a855f7);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .hero-subtitle {
+    font-size: 16px; color: var(--text-secondary);
+    line-height: 1.6; margin-bottom: 48px;
+  }
+
+  .feature-pills { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; }
+
+  .feature-pill {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 6px 14px; border-radius: 20px;
+    background: var(--accent-soft); border: 1px solid var(--border-accent);
+    font-size: 12px; color: var(--accent); font-weight: 500;
+  }
+
+  .login-panel {
+    width: 480px; background: var(--bg-sidebar);
+    display: flex; flex-direction: column;
+    justify-content: center; align-items: center;
+    padding: 60px 48px;
+    border-left: 1px solid var(--border); flex-shrink: 0;
+  }
+
+  .login-card { width: 100%; max-width: 360px; }
+
+  .login-heading {
+    font-family: 'Syne', sans-serif; font-weight: 700;
+    font-size: 22px; color: var(--text-primary); margin-bottom: 6px;
+  }
+
+  .login-sub { font-size: 14px; color: var(--text-muted); margin-bottom: 32px; }
+
+  .auth-btn {
+    width: 100%; display: flex; align-items: center; justify-content: center;
+    gap: 10px; padding: 13px 20px; border-radius: var(--radius);
+    border: 1px solid var(--border); background: var(--bg-card);
+    color: var(--text-primary); font-family: 'DM Sans', sans-serif;
+    font-size: 14px; font-weight: 500; cursor: pointer;
+    transition: border-color 0.2s, background 0.2s, transform 0.15s;
+  }
+
+  .auth-btn:hover {
+    border-color: var(--border-accent); background: var(--bg-input);
+    transform: translateY(-1px);
+  }
+
+  .auth-btn:active { transform: translateY(0); }
+  .auth-btn svg { width: 18px; height: 18px; flex-shrink: 0; }
+  .auth-btn + .auth-btn { margin-top: 10px; }
+
+  .divider {
+    display: flex; align-items: center; gap: 12px;
+    margin: 28px 0; color: var(--text-muted); font-size: 12px;
+  }
+
+  .divider::before, .divider::after {
+    content: ''; flex: 1; height: 1px; background: var(--border);
+  }
+
+  .invite-section {
+    background: var(--bg-panel); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 16px;
+  }
+
+  .invite-label {
+    font-size: 12px; font-weight: 500; color: var(--text-secondary);
+    margin-bottom: 10px; display: flex; align-items: center; gap: 6px;
+  }
+
+  .invite-row { display: flex; gap: 8px; }
+
+  .invite-input {
+    flex: 1; background: var(--bg-input); border: 1px solid var(--border);
+    border-radius: var(--radius-sm); padding: 10px 12px;
+    color: var(--text-primary); font-family: 'DM Sans', sans-serif;
+    font-size: 13px; outline: none; transition: border-color 0.15s;
+  }
+
+  .invite-input::placeholder { color: var(--text-muted); }
+  .invite-input:focus { border-color: var(--border-accent); }
+
+  .invite-btn {
+    padding: 10px 18px; border-radius: var(--radius-sm);
+    background: var(--accent); color: #fff;
+    font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 500;
+    border: none; cursor: pointer;
+    transition: opacity 0.15s, transform 0.15s; white-space: nowrap;
+  }
+
+  .invite-btn:hover { opacity: 0.9; transform: translateY(-1px); }
+
+  .login-footer {
+    margin-top: 32px; text-align: center;
+    font-size: 11px; color: var(--text-muted); line-height: 1.6;
+  }
+
+  .login-footer a { color: var(--accent); text-decoration: none; cursor: pointer; }
+  .login-footer a:hover { text-decoration: underline; }
+
+  .loading-overlay {
+    position: fixed; inset: 0; background: var(--bg-base);
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    z-index: 1000; opacity: 0; pointer-events: none;
+    transition: opacity 0.3s;
+  }
+
+  .loading-overlay.active { opacity: 1; pointer-events: all; }
+
+  .spinner {
+    width: 36px; height: 36px;
+    border: 3px solid var(--border); border-top-color: var(--accent);
+    border-radius: 50%; animation: spin 0.8s linear infinite;
+    margin-bottom: 16px;
+  }
+
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .loading-text { font-size: 14px; color: var(--text-secondary); }
+
+  .float-shape {
+    position: absolute; border-radius: 50%;
+    opacity: 0.03; pointer-events: none;
+    animation: float 20s ease-in-out infinite;
+  }
+
+  .float-shape:nth-child(1) { width: 200px; height: 200px; background: var(--accent); top: 10%; left: 5%; }
+  .float-shape:nth-child(2) { width: 120px; height: 120px; background: #a855f7; bottom: 20%; left: 25%; animation-delay: -7s; }
+  .float-shape:nth-child(3) { width: 160px; height: 160px; background: #06b6d4; top: 40%; right: 10%; animation-delay: -14s; }
+
+  @keyframes float {
+    0%, 100% { transform: translate(0, 0) scale(1); }
+    33% { transform: translate(20px, -20px) scale(1.05); }
+    66% { transform: translate(-10px, 15px) scale(0.95); }
+  }
+
+  @media (max-width: 900px) {
+    .hero { display: none; }
+    .login-panel { width: 100%; border-left: none; }
+  }
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <div class="float-shape"></div>
+  <div class="float-shape"></div>
+  <div class="float-shape"></div>
+
+  <div class="hero-content">
+    <div class="logo">
+      <div class="logo-icon">S</div>
+      <span class="logo-text">StudySpace</span>
+    </div>
+
+    <h1 class="hero-title">Group assignments,<br><span class="accent">finally organised.</span></h1>
+
+    <p class="hero-subtitle">Chat, plan, track contributions, and let AI keep everyone accountable — all in one space built for students.</p>
+
+    <div class="feature-pills">
+      <span class="feature-pill">✦ AI Task Detection</span>
+      <span class="feature-pill">📊 Contribution Tracking</span>
+      <span class="feature-pill">📅 Meeting Scheduler</span>
+      <span class="feature-pill">💬 Group Chat</span>
+      <span class="feature-pill">📁 File Sharing</span>
+    </div>
+  </div>
+</div>
+
+<div class="login-panel">
+  <div class="login-card">
+    <h2 class="login-heading">Welcome to StudySpace</h2>
+    <p class="login-sub">Sign in with your university account to get started.</p>
+
+    <button class="auth-btn" onclick="handleGoogleSignIn()">
+      <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+        <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 01-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4"/>
+        <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+        <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
+        <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+      </svg>
+      Continue with Google
+    </button>
+
+    <button class="auth-btn" onclick="handleMicrosoftSignIn()">
+      <svg viewBox="0 0 21 21" xmlns="http://www.w3.org/2000/svg" width="18" height="18">
+        <rect x="1" y="1" width="9" height="9" fill="#f25022"/>
+        <rect x="11" y="1" width="9" height="9" fill="#7fba00"/>
+        <rect x="1" y="11" width="9" height="9" fill="#00a4ef"/>
+        <rect x="11" y="11" width="9" height="9" fill="#ffb900"/>
+      </svg>
+      Continue with Microsoft
+    </button>
+
+    <div class="divider">or join with invite code</div>
+
+    <div class="invite-section">
+      <div class="invite-label">🔗 Have a group invite code?</div>
+      <div class="invite-row">
+        <input type="text" class="invite-input" id="inviteCode" placeholder="e.g. CS3240-GRP-A">
+        <button class="invite-btn" onclick="handleInvite()">Join</button>
+      </div>
+    </div>
+
+    <div class="login-footer">
+      By continuing, you agree to StudySpace's<br>
+      <a>Terms of Service</a> and <a>Privacy Policy</a>
+    </div>
+  </div>
+</div>
+
+<div class="loading-overlay" id="loadingOverlay">
+  <div class="spinner"></div>
+  <div class="loading-text">Signing you in…</div>
+</div>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-app.js";
+  import { getAuth, signInWithPopup, GoogleAuthProvider, OAuthProvider, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-auth.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyA9tEdIrblFp4JwClZ7smBizQF8crDdyEY",
+    authDomain: "info2222-4f3ee.firebaseapp.com",
+    projectId: "info2222-4f3ee",
+    storageBucket: "info2222-4f3ee.firebasestorage.app",
+    messagingSenderId: "792148569952",
+    appId: "1:792148569952:web:d7e9a9c8035d96239d3805",
+    measurementId: "G-FNNJX23WNG"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const googleProvider = new GoogleAuthProvider();
+  const microsoftProvider = new OAuthProvider('microsoft.com');
+
+  onAuthStateChanged(auth, (user) => {
+    if (user) {
+      const hasProfile = localStorage.getItem('studyspace_profile_done');
+      window.location.href = hasProfile ? 'demo.html' : 'profile.html';
+    }
+  });
+
+  async function signInWith(provider, label) {
+    const overlay = document.getElementById('loadingOverlay');
+    overlay.classList.add('active');
+    document.querySelector('.loading-text').textContent = 'Signing in with ' + label + '…';
+
+    try {
+      await signInWithPopup(auth, provider);
+    } catch (error) {
+      overlay.classList.remove('active');
+      if (error.code === 'auth/popup-closed-by-user') return;
+      alert('Sign-in failed: ' + error.message);
+    }
+  }
+
+  window.handleGoogleSignIn = () => signInWith(googleProvider, 'Google');
+  window.handleMicrosoftSignIn = () => signInWith(microsoftProvider, 'Microsoft');
+
+  window.handleInvite = function() {
+    const code = document.getElementById('inviteCode').value.trim();
+    if (!code) {
+      document.getElementById('inviteCode').style.borderColor = 'var(--red)';
+      setTimeout(() => {
+        document.getElementById('inviteCode').style.borderColor = 'var(--border)';
+      }, 1500);
+      return;
+    }
+    localStorage.setItem('studyspace_invite', code);
+    window.handleGoogleSignIn();
+  };
+
+  document.getElementById('inviteCode').addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') window.handleInvite();
+  });
+</script>
+</body>
+</html>
